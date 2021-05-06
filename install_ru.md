@@ -5,21 +5,12 @@
 --------------------------
 
 Для работы с HANACleaner потребуется загрузить два репозитария с GitHub:
-- `hanacleaner.git` - репозитарий, содержащий python-скрипт HANACleaner (`hanacleaner.py`)
-- `hanacleaner_helper.git` - репозиторий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
+- `https://github/sapbasisru/hanacleaner.git` - репозитарий, содержащий python-скрипт HANACleaner (`hanacleaner.py`)
+- `https://github/sapbasisru/hanacleaner_helper.git` - репозитарий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
 
+Загрузить репозиатрий можно либо с помощью команды `git clone` или другими средствами.
 
-
-You need clone or donwload the HANACleaner repository into a separate folder.
-You can clone HANACleaner with the `git` command or you can use another way to get this repository.
-```sh
-git clone https://github.com/sapbasisru/hanacleaner hanacleaner.git
-```
-
-In the future I will point the folder to HANACleaner repository with variable `__HANALCEANER_FOLDER`.
-```sh
-HANALCEANER_FOLDER = ../hanacleaner.git
-```
+В дальнейшем будет полагать, что локальные копии репозитариев скопированы в папки `$HC_DIR` и `$HCH_DIR` соответственно.
 
 Подготовить папку для исполняемых файлов
 ----------------------------------------
@@ -38,8 +29,8 @@ HANALCEANER_FOLDER = ../hanacleaner.git
 
 ```sh
 [[ test -d /opt/hanacleaner ]] || mkdir /opt/hanacleaner
-cp ${HANALCEANER_FOLDER}/hanacleaner.py /opt/hanacleaner
-cp opt/hanacleaner_starter.sh /opt/hanacleaner
+cp $HC_DIR/hanacleaner.py /opt/hanacleaner
+cp $HCH_DIR/opt/hanacleaner_starter.sh /opt/hanacleaner
 chgrp -R sapsys /opt/hanacleaner
 chown 755 /opt/hanacleaner /opt/hanacleaner/hanacleaner_helper.sh
 ```
@@ -48,7 +39,9 @@ chown 755 /opt/hanacleaner /opt/hanacleaner/hanacleaner_helper.sh
 -------------------------------------------
 
 По умолчанию скрипт-исполнитель для чтения конфигурационных файлов использует папку
-`/etc/opt/hanacleaner`. Можно использовать другое месторасположение папки конфигурационных файлов. Нестандартное расположение папки конфигурационных файлов задается с помощью опции `--config-dir` при старте скрипта-исполнителя.
+`/etc/opt/hanacleaner`. 
+Можно использовать другую папку для конфигурационных файлов. 
+Нестандартное расположение папки задается с помощью опции `--config-dir` при старте скрипта-исполнителя.
 
 Из папки `etc/opt` в подготовленную папку скопировать шаблоны конфигурационных файлов для типовых задачи. На текущий момент доступны следующие шаблоны:
 - `template_housekeeping.conf` - шаблон задачи автоматической периодической очистки БД HANA.
@@ -59,46 +52,21 @@ chown 755 /opt/hanacleaner /opt/hanacleaner/hanacleaner_helper.sh
 
 ```sh
 [[ -d /etc/opt/hanacleaner ]] || mkdir /etc/opt/hanacleaner
-cp etc/opt/template_housekeeping.conf /etc/opt/hanacleaner
-cp etc/opt/template_release_logs.conf /etc/opt/hanacleaner
+cp $HCH_DIR/etc/opt/template_housekeeping.conf /etc/opt/hanacleaner
+cp $HCH_DIR/etc/opt/template_release_logs.conf /etc/opt/hanacleaner
 chgrp -R sapsys /etc/opt/hanacleaner
 chown 775 /etc/opt/hanacleaner
 chown 664 /etc/opt/hanacleaner/*
 ```
 
+Подготовить папку журналов работы
+---------------------------------
 
-Prepare log folder
-------------------
+Для записи журналов работы скрипт-исполнитель использует папку /var/opt/hanaleaner.
+Можно использовать другую папку для записи журналов.
+Нестандартное расположение папки задается с помощью опции `--log-dir` при старте скрипта-исполнителя.
 
-
-Create folder strusture
------------------------
-Create folders for binary files:
-Create folders for configuration files:
 ```sh
-mkdir /etc/opt/hanacleaner
-```
-
-Create folders for log files:
-```sh
-mkdir /var/opt/hanacleaner
-```
-
-Copy the files to folders
--------------------------
-Copy the HANACleaner script:
-```sh
-```
-Copy the HANACleaner heler script:
-```sh
-cp opt/bin/hanacleaner.sh /opt/hanacleaner/bin
-```
-
-Set permisssions and ownership for folders and files
-----------------------------------------------------
-Set group sapsys and permissions to any folders and files of the packet.
-```sh
-chgrp -R sapsys /opt/hanacleaner /etc/opt/hanacleaner /var/opt/hanacleaner
-chmod -R 775 /opt/hanacleaner /opt/hanacleaner/bin /opt/hanacleaner/python
-chmod -R 664 /etc/opt/hanacleaner /var/opt/hanacleaner
+[[ -d /var/opt/hanacleaner ]] || mkdir /var/opt/hanacleaner
+chgrp -R sapsys /var/opt/hanacleaner
 ```
