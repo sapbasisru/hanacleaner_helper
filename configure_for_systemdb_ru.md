@@ -20,7 +20,7 @@ python /opt/hanacleaner/hanacleaner.py --help
 
 ```bash
 SYSTEMDB_ADM_USER_NAME=SYSTEM
-SYSTEMDB_ADM_USER_NAME=???
+SYSTEMDB_ADM_USER_PWD=???
 ```
 
 ---
@@ -38,7 +38,7 @@ HANACLEANER_USER_PWD=?
 
 ---
 
-Определить папки HANACleaner:
+Определить папки *HANACleaner*:
 
 ```bash
 HC_SCRIPT_DIR=/opt/hanacleaner
@@ -57,7 +57,7 @@ $HDBSQL "SELECT * FROM DUMMY"
 Подготовить пользователя для HANACleaner
 ---
 
-Создать техническую учетную запись пользователя для HANACleaner и
+Создать техническую учетную запись пользователя для *HANACleaner* и
 предоставить необходимые права:
 
 ```bash
@@ -74,7 +74,9 @@ $HDBSQL "GRANT RESOURCE ADMIN TO $HANACLEANER_USER_NAME"
 $HDBSQL "GRANT TRACE ADMIN TO $HANACLEANER_USER_NAME"
 $HDBSQL "GRANT SELECT,DELETE ON _SYS_STATISTICS.HOST_OBJECT_LOCK_STATISTICS_BASE TO $HANACLEANER_USER_NAME"
 $HDBSQL "GRANT SELECT,DELETE ON _SYS_STATISTICS.STATISTICS_ALERTS_BASE TO $HANACLEANER_USER_NAME"
+$HDBSQL "GRANT SELECT,DELETE ON _SYS_STATISTICS.STATISTICS_EMAIL_PROCESSING TO $HANACLEANER_USER_NAME"
 $HDBSQL "GRANT SELECT,DELETE ON _SYS_REPO.OBJECT_HISTORY TO $HANACLEANER_USER_NAME"
+
 ```
 
 Создать ключ в HANA Secure User Store
@@ -89,11 +91,11 @@ echo HANA_NAMESERVER_PORT is "$HANA_NAMESERVER_PORT"
 
 ---
 
-Создать ключ для технической учетной записи пользователя HANACleaner пользователя HANA Secure User Store:
+Создать ключ для технической учетной записи пользователя *HANACleaner* в HANA Secure User Store:
 
 ```bash
 hdbuserstore LIST KEY4CLEANER
-hdbuserstore SET KEY4CLEANER "localhost":$HANA_NAMESERVER_PORT $HANACLEANER_USER_NAME $HANACLEANER_USER_PWD
+hdbuserstore SET KEY4CLEANER $(basename $SAP_RETRIEVAL_PATH):$HANA_NAMESERVER_PORT $HANACLEANER_USER_NAME $HANACLEANER_USER_PWD
 hdbuserstore LIST KEY4CLEANER
 ```
 
@@ -108,12 +110,39 @@ ${DIR_EXECUTABLE}/hdbsql -U KEY4CLEANER "SELECT * FROM DUMMY"
 Подготовить параметры задачи housekeeping
 ---
 
-Подготовить шаблон задачи housekeeping для контейнера HANA:
+Подготовить задачу *housekeeping* для контейнера HANA на основе имеющегося шаблона:
 
 ```bash
 cp $HC_CONFIG_DIR/template_housekeeping.conf $HC_CONFIG_DIR/${SAPSYSTEMNAME}_housekeeping.conf
 ```
 
+Скорректировать, параметры задачи *housekeeping*.
+В конфигурационном файле необходимо, как минимум, внести значение `SYSTEMDB` для параметра `-dbs` как показно ниже:
+
+```
+-dbs SYSTEMDB
+```
+
+Открыть на редактирование файл задачи *housekeeping*:
+
+```bash
+vim $HC_CONFIG_DIR/${SAPSYSTEMNAME}_housekeeping.conf
+```
+
+---
+
+Запустить *HANACleaner* в режиме демонстрации:
+
 ```bash
 $HC_SCRIPT_DIR/hanacleaner_starter.sh --hc-opts "-dbs SYSTEMDB -es false" housekeeping
 ```
+
+Запустить *HANACleaner* в режиме исполнения:
+
+```bash
+$HC_SCRIPT_DIR/hanacleaner_starter.sh --hc-opts "-dbs SYSTEMDB" housekeeping
+```
+
+Запланировать запуск скрипта через crontab
+---
+

@@ -144,4 +144,5 @@ for HC_TASK_ID in ${HC_TASK_IDS[@]}; do
     fi
     echo "info: Try to start HANACleaner for task '${HC_TASK_ID}':"
     echo "info:   $HC_EXEC_CMD -ff $HC_TASK_CONFIG_FILE $HC_EXEC_END"
+    $HC_EXEC_CMD -ff $HC_TASK_CONFIG_FILE $HC_EXEC_END
 done
