@@ -23,11 +23,13 @@ Options:
         The default configuration directory is /opt/hanacleaner.
 
     --hc-opts <"HANACleaner options">
-        Pass additional options to the HANACleaner script. The options should be enclosured with quote or double quote.
+        Pass additional options to the HANACleaner script.
+        The options should be enclosured with quote or double quote.
 
     --hc-dir <HANACleaner script directory>
         Use <HANACleaner script directory> as source directory for HANACleaner script hanacleaner.py.
-        If not set then the program will use current directory, /opt/hanacleaner, /usr/sap/<SAPSYSTEMNAME>/SYS/global/hdb/custom/python_support
+        If not set then the program will use current directory, /opt/hanacleaner, 
+        /usr/sap/<SAPSYSTEMNAME>/SYS/global/hdb/custom/python_support
         for searching the HANACleaner script hanacleaner.py.
     
     --log-dir <logging directory>
@@ -134,7 +136,7 @@ HC_EXEC_END="$(eval echo -op ${HC_LOG_DIR} -of ${SAPSYSTEMNAME}_$(basename $SAP_
 # Start HANACleaner script
 # ---
 for HC_TASK_ID in ${HC_TASK_IDS[@]}; do
-    HC_TASK_CONFIG_FILE=${HC_CONFIG_DIR}/${HC_TASK_ID}_${SAPSYSTEMNAME}.conf
+    HC_TASK_CONFIG_FILE=${HC_CONFIG_DIR}/${SAPSYSTEMNAME}_${HC_TASK_ID}.conf
     [[ -f "$HC_TASK_CONFIG_FILE" ]] || HC_TASK_CONFIG_FILE=${HC_CONFIG_DIR}/${HC_TASK_ID}.conf
     if [[ ! -f "$HC_TASK_CONFIG_FILE" ]]; then
         echo "warning: The configuration file for task '${HC_TASK_ID}' not found. Skipping this task..."
