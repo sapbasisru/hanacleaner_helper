@@ -1,5 +1,7 @@
-Конфигурирование HANACleaner для системной БД HANA
+Конфигурирование HANACleaner для прикладного тенанта HANA
 ===
+
+Конфигурирование HANACleaner для прикладного тенанта выполняется после успешного конфигурирования для системной БД.
 
 >[!NOTE]
 >:point_up: Команды выполняются на сервере HANA от имени учетной записи `<hana_sid>adm`.
@@ -7,32 +9,30 @@
 Подготовить окружение для выполнения команд
 ---
 
-Проверить работу скрипта `hanacleaner.py`:
-
 ```bash
-python /opt/hanacleaner/hanacleaner.py --help
+TENANTDB=$SAPSYSTEMNAME
 ```
 
----
-
-Запуск команд в системной БД HANA выполняется
-от имени административной учетной записи пользователя `SYSTEMDB_ADM_USER_NAME`,
-с паролем `SYSTEMDB_ADM_USER_PWD`.
+Запуск команд в прикладном тенанте HANA выполняется
+от имени административной учетной записи пользователя `TENANTDB_ADM_USER_NAME`,
+с паролем `TENANTDB_ADM_USER_PWD`.
 
 Определить административную учетную запись и пароль в системной БД:
 
 ```bash
-SYSTEMDB_ADM_USER_NAME=SYSTEM
-SYSTEMDB_ADM_USER_PWD=???
+TENANTDB_ADM_USER_NAME=SYSTEM
+TENANTDB_ADM_USER_PWD=???
 ```
 
 ---
 
-В системной БД HANA будет создана техническая учетная запись пользователя `HANACLEANER_USER_NAME`
+В прикладном тенанте будет создана техническая учетная запись пользователя `HANACLEANER_USER_NAME`
 от имени которой HANACleaner будет запускать SQL-команды.
 Пароль будет установлен в `HANACLEANER_USER_PWD`.
 
-Определить техническую учетную запись пользователя в системной БД:
+Имя и пароль пользователя должны совпадать с именем и паролем технического пользователя в системной БД.
+
+Определить техническую учетную запись пользователя в прикладном тенанте:
 
 ```bash
 HANACLEANER_USER_NAME=TCU4CLEANER
@@ -54,7 +54,7 @@ HC_LOG_DIR=/var/opt/hanacleaner
 Подготовить и протестировать команду запуска `hdbsql`:
 
 ```bash
-HDBSQL="${DIR_EXECUTABLE}/hdbsql -d SYSTEMDB -n localhost -i ${TINSTANCE} -u $SYSTEMDB_ADM_USER_NAME -p \"${SYSTEMDB_ADM_USER_PWD}\""
+HDBSQL="${DIR_EXECUTABLE}/hdbsql -d $TENANTDB -n localhost -i ${TINSTANCE} -u $TENANTDB_ADM_USER_NAME -p \"${TENANTDB_ADM_USER_PWD}\""
 $HDBSQL "SELECT * FROM DUMMY"
 ```
 
@@ -82,50 +82,18 @@ $HDBSQL "GRANT SELECT,DELETE ON _SYS_STATISTICS.STATISTICS_EMAIL_PROCESSING TO $
 $HDBSQL "GRANT SELECT,DELETE ON _SYS_REPO.OBJECT_HISTORY TO $HANACLEANER_USER_NAME"
 ```
 
-Создать ключ в HANA Secure User Store
----
-
-Определить и визуально проверить порт сервиса HANA `nameserver`:
-
-```bash
-HANA_NAMESERVER_PORT=$($HDBSQL -C -a -x "SELECT SQL_PORT FROM SYS_DATABASES.M_SERVICES WHERE DATABASE_NAME='SYSTEMDB' AND SERVICE_NAME='nameserver' AND COORDINATOR_TYPE= 'MASTER'")
-echo HANA_NAMESERVER_PORT is "$HANA_NAMESERVER_PORT"
-```
-
----
-
-Создать ключ для технической учетной записи пользователя *HANACleaner* в HANA Secure User Store:
-
-```bash
-hdbuserstore LIST KEY4CLEANER
-hdbuserstore SET KEY4CLEANER $(basename $SAP_RETRIEVAL_PATH):$HANA_NAMESERVER_PORT $HANACLEANER_USER_NAME $HANACLEANER_USER_PWD
-hdbuserstore LIST KEY4CLEANER
-```
-
 ---
 
 Проверить подключение к HANA с использованием записи в HANA Secure User Store:
 
 ```bash
-${DIR_EXECUTABLE}/hdbsql -U KEY4CLEANER "SELECT * FROM DUMMY"
+${DIR_EXECUTABLE}/hdbsql -U KEY4CLEANER -d $TENANTDB "SELECT * FROM DUMMY"
 ```
 
 Подготовить параметры задачи housekeeping
 ---
 
-Подготовить задачу *housekeeping* для контейнера HANA на основе имеющегося шаблона:
-
-```bash
-cp $HC_CONFIG_DIR/template_housekeeping.conf $HC_CONFIG_DIR/${SAPSYSTEMNAME}_housekeeping.conf
-```
-
-Скорректировать, параметры задачи *housekeeping*.
-В конфигурационном файле необходимо, как минимум, внести значение `SYSTEMDB` для параметра `-dbs` как показно ниже:
-
-```
--dbs SYSTEMDB
-```
-
+Добавить в конфигурационный файл в параметр `-dbs` прикладной тенант.
 Открыть на редактирование файл задачи *housekeeping* и внести необходимые изменения:
 
 ```bash
@@ -144,18 +112,4 @@ $HC_SCRIPT_DIR/hanacleaner_starter.sh --hc-opts "-es false" housekeeping
 
 ```bash
 $HC_SCRIPT_DIR/hanacleaner_starter.sh housekeeping
-```
-
-Запланировать запуск скрипта через crontab
----
-
-Добавить в планировщик ОС *crontab* ежедневный запуск *HANACleaner* в час ночи:
-
-```bash
-( crontab -l ; \
-cat<<EOF
-# Start HANACleaner for housekeeping tasks for HANA MDC $SAPSYSTEMNAME 
-0 1 * * * $HC_SCRIPT_DIR/hanacleaner_starter.sh housekeeping > $HC_LOG_DIR/hanacleanercron_${SAPSYSTEMNAME}.txt 2>&1
-EOF
-) | crontab -
 ```

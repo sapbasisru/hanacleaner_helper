@@ -1,6 +1,9 @@
 ﻿Инсталляция скрипта HANACleaner
 ===============================
 
+>[!NOTE]
+>:point_up: Команды выполняются на сервере HANA от имени учетной записи `root`.
+
 Загрузить Git-репозитарии
 --------------------------
 
@@ -18,7 +21,7 @@
 ```bash
 [[ -d $HC_REPO_DIR ]] || \
     git clone https://github.com/sapbasisru/hanacleaner.git $HC_REPO_DIR
-cd $HC_REPO_DIR && git pull
+cd $HC_REPO_DIR && git pull origin master
 ```
 
 Скопировать/обновить репозитарий `hanacleaner_helper.git`:
@@ -26,7 +29,7 @@ cd $HC_REPO_DIR && git pull
 ```bash
 [[ -d $HCH_REPO_DIR ]] || \
     git clone https://github.com/sapbasisru/hanacleaner_helper.git $HCH_REPO_DIR
-cd $HCH_REPO_DIR && git pull
+cd $HCH_REPO_DIR && git pull origin main
 ```
 
 Подготовить папку для исполняемых файлов
