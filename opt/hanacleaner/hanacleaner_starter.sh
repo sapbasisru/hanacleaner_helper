@@ -129,15 +129,15 @@ fi
 
 # Construct HANACleaner command and suffix
 # ---
-HC_EXEC_CMD="python $(eval echo ${HC_SCRIPT_DIR}/${HC_SCRIPT_NAME})"
-HC_EXEC_END="$(eval echo -op ${HC_LOG_DIR} -of ${SAPSYSTEMNAME}_$(basename $SAP_RETRIEVAL_PATH))"
+HC_EXEC_CMD="python $(eval echo $HC_SCRIPT_DIR/$HC_SCRIPT_NAME)"
+HC_EXEC_END="$(eval echo -op $HC_LOG_DIR -of ${SAPSYSTEMNAME}_$(basename $SAP_RETRIEVAL_PATH))"
 [[ -z "$HC_OPTS" ]] || HC_EXEC_END="$HC_EXEC_END $HC_OPTS"
 
 # Start HANACleaner script
 # ---
 for HC_TASK_ID in ${HC_TASK_IDS[@]}; do
-    HC_TASK_CONFIG_FILE=${HC_CONFIG_DIR}/${SAPSYSTEMNAME}_${HC_TASK_ID}.conf
-    [[ -f "$HC_TASK_CONFIG_FILE" ]] || HC_TASK_CONFIG_FILE=${HC_CONFIG_DIR}/${HC_TASK_ID}.conf
+    HC_TASK_CONFIG_FILE=$HC_CONFIG_DIR/${SAPSYSTEMNAME}_${HC_TASK_ID}.conf
+    [[ -f "$HC_TASK_CONFIG_FILE" ]] || HC_TASK_CONFIG_FILE=$HC_CONFIG_DIR/${HC_TASK_ID}.conf
     if [[ ! -f "$HC_TASK_CONFIG_FILE" ]]; then
         echo "warning: The configuration file for task '${HC_TASK_ID}' not found. Skipping this task..."
         continue
