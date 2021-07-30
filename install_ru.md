@@ -1,63 +1,115 @@
 ﻿Инсталляция скрипта HANACleaner
 ===============================
 
-Загрузить Git-репозитарии 
+Загрузить Git-репозитарии
 --------------------------
 
 Для работы с HANACleaner потребуется загрузить два репозитария с GitHub:
-- `https://github/sapbasisru/hanacleaner.git` - репозитарий, содержащий python-скрипт HANACleaner (`hanacleaner.py`)
-- `https://github/sapbasisru/hanacleaner_helper.git` - репозитарий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
 
-Загрузить репозиатрий можно либо с помощью команды `git clone` или другими средствами.
+- `https://github.com/sapbasisru/hanacleaner.git` - репозитарий, содержащий python-скрипт HANACleaner (`hanacleaner.py`).
+- `https://github.com/sapbasisru/hanacleaner_helper.git` - репозитарий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
 
-В дальнейшем будет полагать, что локальные копии репозитариев скопированы в папки `$HC_DIR` и `$HCH_DIR` соответственно.
+Загрузить репозитарий можно либо с помощью команды `git clone` или другими средствами.
+
+В дальнейшем предполагается, что переменные `HC_REPO_DIR` и `HCH_REPO_DIR` указывают на папки с локальными копиями репозитариев.
+
+Скопировать/обновить репозитарий `hanacleaner.git`:
+
+```bash
+[[ -d $HC_REPO_DIR ]] || mkdir $HC_REPO_DIR
+ls -ld $HC_REPO_DIR && \
+    git clone https://github.com/sapbasisru/hanacleaner.git $HC_REPO_DIR
+```
+
+Скопировать/обновить репозитарий `hanacleaner_helper.git`:
+
+```bash
+[[ -d $HCH_REPO_DIR ]] || mkdir $HCH_REPO_DIR
+ls -ld $HCH_REPO_DIR && \
+    git clone https://github.com/sapbasisru/hanacleaner_helper.git $HCH_REPO_DIR
+```
 
 Подготовить папку для исполняемых файлов
 ----------------------------------------
 
 В простых случаях для размещения исполняемых файлов можно использовать
 локальную папку `/opt/hanacleaner`.
-Возможно, для scale-out конфигураций HANA, более простым в экслуатации решением 
-будет использование общей для всех узлов HANA папки, например, 
-`/usr/sap/${SAPSYSTEMNAME}/SYS/global/hdb/custom/python_support`
+Возможно, для scale-out конфигураций HANA, более простым в экслуатации решением
+будет использование общей для всех узлов HANA папки, например,
+`/usr/sap/${SAPSYSTEMNAME}/SYS/global/hdb/custom/python_support`.
+Далее используется переменная `HCH_EXE_DIR` для указания папки исполняемых файлов:
 
-В папку исполняемых файлов необходимо разместить:
+```bash
+HCH_EXE_DIR=/opt/hanacleaner
+```
+
+Подготовить папку исполняемых файлов:
+
+```bash
+[[ -d $HCH_EXE_DIR ]] || \
+    ( mkdir $HCH_EXE_DIR && chgrp sapsys $HCH_EXE_DIR && chmod 775 $HCH_EXE_DIR )
+ls -ld $HCH_EXE_DIR
+```
+
+В папку исполняемых файлов необходимо скопировать:
+
 - python-скрипт HANACleaner `hanacleaner.py` и
 - скрипт-исполнитель `opt/hanacleaner-starter.sh`.
 
-Для доступа администраторов ОС БД HANA к сриптам необходимо установить группу `sapsys` для папки и файлов и маску прав 755.
+```bash
+cp $HC_REPO_DIR/hanacleaner.py $HCH_EXE_DIR
+cp $HCH_REPO_DIR/opt/hanacleaner/hanacleaner_starter.sh $HCH_EXE_DIR
+chgrp sapsys $HCH_EXE_DIR/hanacleaner.py $HCH_EXE_DIR/hanacleaner_starter.sh 
+chmod 755 $HCH_EXE_DIR/hanacleaner_starter.sh
+```
+
+Протестировать запуск скрипта `hanacleaner_starter.sh`:
 
 ```sh
-[[ test -d /opt/hanacleaner ]] || mkdir /opt/hanacleaner
-cp $HC_DIR/hanacleaner.py /opt/hanacleaner
-cp $HCH_DIR/opt/hanacleaner_starter.sh /opt/hanacleaner
-chgrp -R sapsys /opt/hanacleaner
-chown 755 /opt/hanacleaner /opt/hanacleaner/hanacleaner_helper.sh
+$HCH_EXE_DIR/hanacleaner_starter.sh --help
 ```
 
 Подготовить папку конфигурационных файлов
 -------------------------------------------
 
 По умолчанию скрипт-исполнитель для чтения конфигурационных файлов использует папку
-`/etc/opt/hanacleaner`. 
-Можно использовать другую папку для конфигурационных файлов. 
+`/etc/opt/hanacleaner`.
+
+Можно использовать другую папку для хранения конфигурационных файлов.
 Нестандартное расположение папки задается с помощью опции `--config-dir` при старте скрипта-исполнителя.
 
-Из папки `etc/opt` в подготовленную папку скопировать шаблоны конфигурационных файлов для типовых задачи. На текущий момент доступны следующие шаблоны:
-- `template_housekeeping.conf` - шаблон задачи автоматической периодической очистки БД HANA.
-- `template_release_logs.conf` - шаюлон задачи очистки свободных журнальных файлов БД HANA.
+Далее используется переменная `HCH_CFG_DIR` для указания папки конфигурационных файлов:
+
+```bash
+HCH_CFG_DIR=/etc/opt/hanacleaner
+```
+
+Подготовить папку конфигурационных файлов:
+
+```bash
+[[ -d $HCH_CFG_DIR ]] || \
+    ( mkdir $HCH_CFG_DIR && chgrp sapsys $HCH_CFG_DIR && chmod 775 $HCH_CFG_DIR )
+ls -ld $HCH_CFG_DIR
+```
+
+Скопировать из папки `$HCH_REPO_DIR/etc/opt/hanacleaner/` шаблоны конфигурационных файлов для типовых задач.
+На текущий момент доступны следующие шаблоны:
+
+- `template_housekeeping.conf` - шаблон задачи автоматической периодической очистки БД HANA,
+- `template_release_logs.conf` - шаблон задачи очистки свободных журнальных файлов БД HANA.
+
+```sh
+cp $HCH_REPO_DIR/etc/opt/hanacleaner/template_housekeeping.conf $HCH_CFG_DIR
+cp $HCH_REPO_DIR/etc/opt/hanacleaner/template_release_logs.conf $HCH_CFG_DIR
+chgrp sapsys $HCH_CFG_DIR/*
+chmod 664 $HCH_CFG_DIR/*
+```
+
+
 
 Для доступа администраторов ОС БД HANA к конфигурационным файлам необходимо установить группу `sapsys` для папки и файлов. 
 Для папки установить маску прав 775, для файлов - 664.
 
-```sh
-[[ -d /etc/opt/hanacleaner ]] || mkdir /etc/opt/hanacleaner
-cp $HCH_DIR/etc/opt/template_housekeeping.conf /etc/opt/hanacleaner
-cp $HCH_DIR/etc/opt/template_release_logs.conf /etc/opt/hanacleaner
-chgrp -R sapsys /etc/opt/hanacleaner
-chown 775 /etc/opt/hanacleaner
-chown 664 /etc/opt/hanacleaner/*
-```
 
 Подготовить папку журналов работы
 ---------------------------------
