@@ -1,4 +1,4 @@
-HANAСleaner Starting Utility in the Predefined System Environment
+HANAСleaner Starting Utility in the Predefined Environment
 ===
 
 The description available in Russian only.
