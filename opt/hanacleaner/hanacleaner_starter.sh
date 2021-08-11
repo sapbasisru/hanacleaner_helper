@@ -1,4 +1,5 @@
 #!/bin/bash
+[[ -f $HOME/.bashrc ]] && source $HOME/.bashrc
 
 showHelp() {
     cat<<EOF
@@ -39,6 +40,8 @@ Options:
     --help
         Display this help and exit.
 
+Authors:
+    - Mikhail Prusov, mprusov@sapbasis.ru
 EOF
 }
 

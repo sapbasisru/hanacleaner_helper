@@ -4,32 +4,37 @@
 >[!NOTE]
 >:point_up: Команды выполняются на сервере HANA от имени учетной записи `root`.
 
-Загрузить Git-репозитарии
+Загрузить Git-репозитории
 --------------------------
 
-Для работы с HANACleaner потребуется загрузить два репозитария с GitHub:
+Для работы с HANACleaner потребуется загрузить два репозитория с GitHub:
 
-- `https://github.com/sapbasisru/hanacleaner.git` - репозитарий, содержащий python-скрипт HANACleaner (`hanacleaner.py`).
-- `https://github.com/sapbasisru/hanacleaner_helper.git` - репозитарий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
+- `https://github.com/sapbasisru/hanacleaner.git` - репозиторий, содержащий python-скрипт HANACleaner (`hanacleaner.py`).
+- `https://github.com/sapbasisru/hanacleaner_helper.git` - репозиторий, содержащий скрипт-исполнитель и подготовленные конфигурационные файлы.
 
-Загрузить репозитарий можно либо с помощью команды `git clone` или другими средствами.
+Загрузить репозиторий можно либо с помощью команды `git clone` или другими средствами.
 
-В дальнейшем предполагается, что переменные `HC_REPO_DIR` и `HCH_REPO_DIR` указывают на папки с локальными копиями репозитариев.
-
-Скопировать/обновить репозитарий `hanacleaner.git`:
+В дальнейшем предполагается,
+что переменные `HC_REPO_DIR` и `HCH_REPO_DIR` указывают на папки с локальными копиями репозиториев.
+Предположим, что используются пути
+`/stage/sapbasisru.github/hanacleaner.git` и
+`/stage/sapbasisru.github/hanacleaner_helper.git` соответственно:
 
 ```bash
-[[ -d $HC_REPO_DIR ]] || \
-    git clone https://github.com/sapbasisru/hanacleaner.git $HC_REPO_DIR
-cd $HC_REPO_DIR && git pull origin master
+HC_REPO_DIR=/stage/sapbasisru.github/hanacleaner.git
+HCH_REPO_DIR=/stage/sapbasisru.github/hanacleaner_helper.git
 ```
 
-Скопировать/обновить репозитарий `hanacleaner_helper.git`:
+Скопировать репозиторий [hanacleaner.git](https://github.com/sapbasisru/hanacleaner.git):
 
 ```bash
-[[ -d $HCH_REPO_DIR ]] || \
-    git clone https://github.com/sapbasisru/hanacleaner_helper.git $HCH_REPO_DIR
-cd $HCH_REPO_DIR && git pull origin main
+git clone https://github.com/sapbasisru/hanacleaner.git $HC_REPO_DIR
+```
+
+Скопировать репозиторий [hanacleaner_helper.git](https://github.com/sapbasisru/hanacleaner_helper.git):
+
+```bash
+git clone https://github.com/sapbasisru/hanacleaner_helper.git $HCH_REPO_DIR
 ```
 
 Подготовить папку для исполняемых файлов
