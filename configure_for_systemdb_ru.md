@@ -18,12 +18,16 @@ python /opt/hanacleaner/hanacleaner.py --help
 Запуск команд в системной БД HANA выполняется
 от имени административной учетной записи пользователя `SYSTEMDB_ADM_USER_NAME`,
 с паролем `SYSTEMDB_ADM_USER_PWD`.
-
-Определить административную учетную запись и пароль в системной БД:
+Установить имя административной учетной записи в системной БД:
 
 ```bash
 SYSTEMDB_ADM_USER_NAME=SYSTEM
-SYSTEMDB_ADM_USER_PWD=???
+```
+
+Установить пароль административной учетной записи:
+
+```bash
+SYSTEMDB_ADM_USER_PWD=<Пароль пользователя SYSTEM>
 ```
 
 ---
@@ -31,12 +35,16 @@ SYSTEMDB_ADM_USER_PWD=???
 В системной БД HANA будет создана техническая учетная запись пользователя `HANACLEANER_USER_NAME`
 от имени которой HANACleaner будет запускать SQL-команды.
 Пароль будет установлен в `HANACLEANER_USER_PWD`.
-
-Определить техническую учетную запись пользователя в системной БД:
+Установить имя технического пользователя:
 
 ```bash
 HANACLEANER_USER_NAME=TCU4CLEANER
-HANACLEANER_USER_PWD=?
+```
+
+Установить пароль технического пользователя:
+
+```bash
+HANACLEANER_USER_PWD=<Пароль пользователя TCU4CLEANER>
 ```
 
 ---
@@ -54,7 +62,7 @@ HC_LOG_DIR=/var/opt/hanacleaner
 Подготовить и протестировать команду запуска `hdbsql`:
 
 ```bash
-HDBSQL="${DIR_EXECUTABLE}/hdbsql -d SYSTEMDB -n localhost -i ${TINSTANCE} -u $SYSTEMDB_ADM_USER_NAME -p \"${SYSTEMDB_ADM_USER_PWD}\""
+HDBSQL="${DIR_EXECUTABLE}/hdbsql -d SYSTEMDB -n localhost -i ${TINSTANCE} -u $SYSTEMDB_ADM_USER_NAME -p \"${SYSTEMDB_ADM_USER_PWD}\" -j"
 $HDBSQL "SELECT * FROM DUMMY"
 ```
 
@@ -89,7 +97,7 @@ $HDBSQL "GRANT SELECT,DELETE ON _SYS_REPO.OBJECT_HISTORY TO $HANACLEANER_USER_NA
 
 ```bash
 HANA_NAMESERVER_PORT=$($HDBSQL -C -a -x "SELECT SQL_PORT FROM SYS_DATABASES.M_SERVICES WHERE DATABASE_NAME='SYSTEMDB' AND SERVICE_NAME='nameserver' AND COORDINATOR_TYPE= 'MASTER'")
-echo HANA_NAMESERVER_PORT is "$HANA_NAMESERVER_PORT"
+echo "`tput setaf 2`HANA nameserver port is`tput sgr0` : [`tput setaf 1`$HANA_NAMESERVER_PORT`tput sgr0`]"
 ```
 
 ---
@@ -107,7 +115,7 @@ hdbuserstore LIST KEY4CLEANER
 Проверить подключение к HANA с использованием записи в HANA Secure User Store:
 
 ```bash
-${DIR_EXECUTABLE}/hdbsql -U KEY4CLEANER "SELECT * FROM DUMMY"
+${DIR_EXECUTABLE}/hdbsql -U KEY4CLEANER -j "SELECT * FROM DUMMY"
 ```
 
 Подготовить параметры задачи housekeeping

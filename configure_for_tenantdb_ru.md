@@ -16,12 +16,16 @@ TENANTDB=$SAPSYSTEMNAME
 Запуск команд в прикладном тенанте HANA выполняется
 от имени административной учетной записи пользователя `TENANTDB_ADM_USER_NAME`,
 с паролем `TENANTDB_ADM_USER_PWD`.
-
-Определить административную учетную запись и пароль в системной БД:
+Установить имя административной учетной записи в системной БД:
 
 ```bash
 TENANTDB_ADM_USER_NAME=SYSTEM
-TENANTDB_ADM_USER_PWD=???
+```
+
+Установить пароль административной учетной записи:
+
+```bash
+TENANTDB_ADM_USER_PWD=<Пароль пользователя SYSTEM>
 ```
 
 ---
@@ -30,13 +34,17 @@ TENANTDB_ADM_USER_PWD=???
 от имени которой HANACleaner будет запускать SQL-команды.
 Пароль будет установлен в `HANACLEANER_USER_PWD`.
 
-Имя и пароль пользователя должны совпадать с именем и паролем технического пользователя в системной БД.
-
-Определить техническую учетную запись пользователя в прикладном тенанте:
+Имя и пароль пользователя ***должны совпадать*** с именем и паролем технического пользователя в системной БД.
+Установить имя технического пользователя:
 
 ```bash
 HANACLEANER_USER_NAME=TCU4CLEANER
-HANACLEANER_USER_PWD=?
+```
+
+Установить пароль технического пользователя:
+
+```bash
+HANACLEANER_USER_PWD=<Пароль пользователя TCU4CLEANER>
 ```
 
 ---
@@ -54,7 +62,7 @@ HC_LOG_DIR=/var/opt/hanacleaner
 Подготовить и протестировать команду запуска `hdbsql`:
 
 ```bash
-HDBSQL="${DIR_EXECUTABLE}/hdbsql -d $TENANTDB -n localhost -i ${TINSTANCE} -u $TENANTDB_ADM_USER_NAME -p \"${TENANTDB_ADM_USER_PWD}\""
+HDBSQL="${DIR_EXECUTABLE}/hdbsql -d $TENANTDB -n localhost -i ${TINSTANCE} -u $TENANTDB_ADM_USER_NAME -p \"${TENANTDB_ADM_USER_PWD}\" -j"
 $HDBSQL "SELECT * FROM DUMMY"
 ```
 
